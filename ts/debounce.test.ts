@@ -1,7 +1,7 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { debounce } from "./debounce.js";
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { debounce } from './debounce.js';
 
-describe("debounce", () => {
+describe('debounce', () => {
   beforeEach(() => {
     vi.useFakeTimers();
   });
@@ -10,13 +10,13 @@ describe("debounce", () => {
     vi.useRealTimers();
   });
 
-  it("should debounce a function", () => {
+  it('should debounce a function', () => {
     const mockFn = vi.fn();
     const debounced = debounce(mockFn, 0);
     expect(typeof debounced).toBe('function');
   });
 
-  it("reset timer on ever call", () => {
+  it('reset timer on ever call', () => {
     const mockFn = vi.fn();
     const debounced = debounce(mockFn, 300);
 
@@ -32,7 +32,7 @@ describe("debounce", () => {
     expect(mockFn).toHaveBeenCalledTimes(1);
   });
 
-    it("does not call the function immediately", () => {
+  it('does not call the function immediately', () => {
     const mockFn = vi.fn();
     const debounced = debounce(mockFn, 300);
 
@@ -41,12 +41,12 @@ describe("debounce", () => {
 
     vi.advanceTimersByTime(299);
     expect(mockFn).not.toHaveBeenCalled();
-    
+
     vi.advanceTimersByTime(300);
     expect(mockFn).toHaveBeenCalledTimes(1);
   });
 
-  it("call with last arguments", () => {
+  it('call with last arguments', () => {
     const mockFn = vi.fn();
     const debounced = debounce(mockFn, 300);
 
@@ -58,4 +58,4 @@ describe("debounce", () => {
     expect(mockFn).toHaveBeenCalledTimes(1);
     expect(mockFn).toHaveBeenCalledWith('spain');
   });
-})
+});
