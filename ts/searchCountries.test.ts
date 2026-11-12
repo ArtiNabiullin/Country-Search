@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, afterEach } from 'vitest';
-import { searchCountries } from './searchCountries.js';
+import { searchCountries, HttpError } from './searchCountries.js';
 
 describe('searchCountries', () => {
   afterEach(() => {
