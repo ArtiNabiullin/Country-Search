@@ -15,7 +15,7 @@ describe('searchController', () => {
       return new Promise<never>(() => {});
     });
 
-    const search = searchController(mockSearch, 300, vi.fn());
+    const search = searchController(mockSearch, 300, vi.fn(), vi.fn());
     search.onInput('sp');
     await vi.advanceTimersByTimeAsync(300);
 
@@ -48,7 +48,7 @@ describe('searchController', () => {
         }),
     );
 
-    const search = searchController(mockSearch, 300, onError);
+    const search = searchController(mockSearch, 300, onError, vi.fn());
 
     search.onInput('sp');
     await vi.advanceTimersByTimeAsync(300);
@@ -66,7 +66,7 @@ describe('searchController', () => {
     const onError = vi.fn();
     const mockSearch = vi.fn().mockRejectedValue(networkError);
 
-    const search = searchController(mockSearch, 300, onError);
+    const search = searchController(mockSearch, 300, onError, vi.fn());
 
     search.onInput('sp');
     await vi.advanceTimersByTimeAsync(300);
@@ -74,5 +74,41 @@ describe('searchController', () => {
 
     await Promise.resolve();
     expect(onError).toHaveBeenCalledWith(networkError);
+  });
+
+  it('successful outcome', async () => {
+    vi.useFakeTimers();
+
+    const onError = vi.fn();
+    const onResults = vi.fn();
+    const countries = [{ name: 'Spain' }];
+    const mockSearch = vi.fn().mockResolvedValue(countries);
+
+    const search = searchController(mockSearch, 300, onError, onResults);
+
+    search.onInput('spain');
+    await vi.advanceTimersByTimeAsync(300);
+
+    expect(onResults).toHaveBeenCalledWith(countries);
+    expect(onError).not.toHaveBeenCalled();
+  });
+
+  it('checking for empty input', async () => {
+    vi.useFakeTimers();
+
+    const onError = vi.fn();
+    const onResults = vi.fn();
+    const countries = [{ name: 'Spain' }];
+    const mockSearch = vi.fn().mockResolvedValue(countries);
+
+    const search = searchController(mockSearch, 300, onError, onResults);
+
+    search.onInput('sp');
+    search.onInput('');
+    expect(onResults).toHaveBeenCalledWith([]);
+
+    await vi.advanceTimersByTimeAsync(300);
+
+    expect(mockSearch).not.toHaveBeenCalled();
   });
 });
