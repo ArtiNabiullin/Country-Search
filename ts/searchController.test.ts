@@ -33,7 +33,7 @@ describe('searchController', () => {
     expect(mockSearch).toHaveBeenCalledTimes(2);
   });
 
-  it('the request was aborted, the mock rejected with an AbortError, and the custom error handler was not called.', async () => {
+  it('the request was aborted, the mock rejected with an AbortError, and the custom error handler was not called', async () => {
     vi.useFakeTimers();
 
     const onError = vi.fn();
@@ -110,5 +110,21 @@ describe('searchController', () => {
     await vi.advanceTimersByTimeAsync(300);
 
     expect(mockSearch).not.toHaveBeenCalled();
+  });
+
+    it('forwards TimeoutError to onError', async () => {
+    vi.useFakeTimers();
+
+    const onError = vi.fn();
+    const timeoutError = new DOMException('Time out', 'TimeoutError');
+    const mockSearch = vi.fn().mockRejectedValue(timeoutError);
+
+    const search = searchController(mockSearch, 300, onError, vi.fn());
+
+    search.onInput('sp');
+    await vi.advanceTimersByTimeAsync(300);
+    await Promise.resolve();
+
+    expect(onError).toHaveBeenCalledWith(timeoutError);
   });
 });
