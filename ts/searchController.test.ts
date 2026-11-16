@@ -112,7 +112,7 @@ describe('searchController', () => {
     expect(mockSearch).not.toHaveBeenCalled();
   });
 
-    it('forwards TimeoutError to onError', async () => {
+  it('forwards TimeoutError to onError', async () => {
     vi.useFakeTimers();
 
     const onError = vi.fn();

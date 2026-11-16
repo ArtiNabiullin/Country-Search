@@ -4,6 +4,7 @@ import { searchCountries, HttpError } from './searchCountries.js';
 describe('searchCountries', () => {
   afterEach(() => {
     vi.unstubAllGlobals();
+    vi.restoreAllMocks();
   });
 
   it('successful response: an array of countries is returned', async () => {
@@ -69,5 +70,36 @@ describe('searchCountries', () => {
     const request = searchCountries('spain', controller.signal);
 
     await expect(request).rejects.toBe(networkError);
+  });
+
+  it('timeout signal aborts fetch with TimeoutError', async () => {
+    const timeoutController = new AbortController();
+    const timeoutSpy = vi
+      .spyOn(AbortSignal, 'timeout')
+      .mockReturnValue(timeoutController.signal);
+
+    const mockFetch = vi.fn((url: string, options: { signal: AbortSignal }) => {
+      expect(url).toBe('https://countries.dev/name/spain');
+
+      return new Promise<never>((_, reject) => {
+        options.signal.addEventListener(
+          'abort',
+          () => reject(options.signal.reason),
+          { once: true },
+        );
+      });
+    });
+    vi.stubGlobal('fetch', mockFetch);
+
+    const userController = new AbortController();
+
+    const request = searchCountries('spain', userController.signal);
+
+    expect(timeoutSpy).toHaveBeenCalledWith(expect.any(Number));
+
+    const timeoutError = new DOMException('Timed out', 'TimeoutError');
+    timeoutController.abort(timeoutError);
+
+    await expect(request).rejects.toBe(timeoutError);
   });
 });
