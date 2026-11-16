@@ -3,7 +3,13 @@ interface ApiLanguage {
   name: string;
 }
 
-interface RawCountryResponse {
+interface ApiCurrency {
+  code: string;
+  name: string;
+  symbol: string;
+}
+
+export interface RawCountryResponse {
   name: string;
   capital: string;
   region: string;
@@ -11,11 +17,16 @@ interface RawCountryResponse {
   population: number;
   area: number;
   languages: ApiLanguage[];
+  currencies: ApiCurrency[];
   flag: string;
+  flags?: {
+    png?: string;
+    svg?: string;
+  };
   borders: string[];
 }
 
-interface Country {
+export interface Country {
   name: string;
   capital: string;
   region: string;
@@ -23,6 +34,7 @@ interface Country {
   population: number;
   area: number;
   languages: string[];
+  currencies: string[];
   flag: string;
   borders: string[];
 }
@@ -36,7 +48,10 @@ export function mapCountryResponse(raw: RawCountryResponse): Country {
     population: raw.population,
     area: raw.area,
     languages: raw.languages.map((language) => language.name),
-    flag: raw.flag,
+    currencies: raw.currencies.map(
+      (currency) => `${currency.name} (${currency.symbol})`,
+    ),
+    flag: raw.flags?.svg ?? raw.flag,
     borders: raw.borders,
   };
 

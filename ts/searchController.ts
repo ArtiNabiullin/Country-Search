@@ -1,10 +1,10 @@
 import { debounce } from './debounce.js';
 
-export function searchController(
-  search: (query: string, signal: AbortSignal) => Promise<unknown>,
+export function searchController<Result>(
+  search: (query: string, signal: AbortSignal) => Promise<Result[]>,
   delay: number,
   onError: (error: unknown) => void,
-  onResults: (results: unknown) => void,
+  onResults: (results: Result[]) => void,
 ) {
   let activeController: AbortController | null = null;
 

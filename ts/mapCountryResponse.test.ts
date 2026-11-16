@@ -11,6 +11,7 @@ describe('mapCountryResponse', () => {
       population: 329484123,
       area: 9372610,
       languages: [{ iso639_1: 'en', name: 'English' }],
+      currencies: [{ code: 'USD', name: 'United States dollar', symbol: '$' }],
       flag: 'https://countries.dev/flags/us.svg',
       borders: ['CAN', 'MEX'],
     };
@@ -22,6 +23,7 @@ describe('mapCountryResponse', () => {
       population: 329484123,
       area: 9372610,
       languages: ['English'],
+      currencies: ['United States dollar ($)'],
       flag: 'https://countries.dev/flags/us.svg',
       borders: ['CAN', 'MEX'],
     };
