@@ -36,7 +36,7 @@ jobs:
         run: |
           mkdir -p _site/dist
           cp index.html styles.css _site/
-          cp dist/main.js _site/dist/
+          cp -R dist/. _site/dist/
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
