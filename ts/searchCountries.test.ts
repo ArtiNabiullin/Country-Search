@@ -19,9 +19,10 @@ describe('searchCountries', () => {
     const controller = new AbortController();
     const countries = await searchCountries('spain', controller.signal);
 
-    expect(mockFetch).toHaveBeenCalledWith('https://countries.dev/name/spain', {
-      signal: controller.signal,
-    });
+    expect(mockFetch).toHaveBeenCalledWith(
+      'https://countries.dev/name/spain',
+      expect.objectContaining({ signal: expect.any(AbortSignal) }),
+    );
     expect(countries).toEqual(['spain', 'russia', 'usa']);
   });
 
@@ -36,9 +37,10 @@ describe('searchCountries', () => {
     const controller = new AbortController();
     const countries = await searchCountries('spain', controller.signal);
 
-    expect(mockFetch).toHaveBeenCalledWith('https://countries.dev/name/spain', {
-      signal: controller.signal,
-    });
+    expect(mockFetch).toHaveBeenCalledWith(
+      'https://countries.dev/name/spain',
+      expect.objectContaining({ signal: expect.any(AbortSignal) }),
+    );
     expect(countries).toEqual([]);
   });
 
@@ -55,9 +57,10 @@ describe('searchCountries', () => {
 
     await expect(request).rejects.toBeInstanceOf(HttpError);
     await expect(request).rejects.toMatchObject({ status: 500 });
-    expect(mockFetch).toHaveBeenCalledWith('https://countries.dev/name/spain', {
-      signal: controller.signal,
-    });
+    expect(mockFetch).toHaveBeenCalledWith(
+      'https://countries.dev/name/spain',
+      expect.objectContaining({ signal: expect.any(AbortSignal) }),
+    );
   });
 
   it('network error', async () => {
@@ -101,5 +104,34 @@ describe('searchCountries', () => {
     timeoutController.abort(timeoutError);
 
     await expect(request).rejects.toBe(timeoutError);
+  });
+
+  it('user abort cancels fetch through the combined signal', async () => {
+    const timeoutController = new AbortController();
+    const timeoutSpy = vi
+      .spyOn(AbortSignal, 'timeout')
+      .mockReturnValue(timeoutController.signal);
+
+    const mockFetch = vi.fn((url: string, options: { signal: AbortSignal }) => {
+      expect(url).toBe('https://countries.dev/name/spain');
+
+      return new Promise<never>((_, reject) => {
+        options.signal.addEventListener(
+          'abort',
+          () => reject(options.signal.reason),
+          { once: true },
+        );
+      });
+    });
+    vi.stubGlobal('fetch', mockFetch);
+
+    const userController = new AbortController();
+    const request = searchCountries('spain', userController.signal);
+
+    userController.abort();
+
+    expect(timeoutSpy).toHaveBeenCalledTimes(1);
+    await expect(request).rejects.toMatchObject({ name: 'AbortError' });
+    expect(mockFetch).toHaveBeenCalledTimes(1);
   });
 });
